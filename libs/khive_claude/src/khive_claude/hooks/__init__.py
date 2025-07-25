@@ -17,10 +17,13 @@ from .hook_event import (
     shield,
 )
 
+__version__ = "0.1.1"
+
 __all__ = [
     "HookEvent",
     "HookEventContent",
     "HookEventBroadcaster",
     "hook_event_logger",
     "shield",
+    "__version__",
 ]

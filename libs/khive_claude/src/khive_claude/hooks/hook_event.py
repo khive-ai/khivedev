@@ -108,9 +108,7 @@ class HookEvent(Node):
                 raise ValueError("Tool name is required")
             return value
         else:
-            raise ValueError(
-                "Content must be a dictionary"
-            )
+            raise ValueError("Content must be a dictionary")
 
     async def save(self):
         # Save to database
@@ -134,7 +132,7 @@ class HookEvent(Node):
         }
         if limit:
             params["limit"] = limit
-            
+
         return await cls.adapt_from_async(
             params,
             obj_key="lionagi_async_pg",

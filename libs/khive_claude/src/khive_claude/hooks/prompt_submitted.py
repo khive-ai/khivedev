@@ -13,7 +13,13 @@ import json
 import sys
 from typing import Any
 
-from khive_claude.hooks.hook_event import HookEvent, HookEventContent, shield
+import anyio
+from khive_claude.hooks.hook_event import (
+    HookEvent,
+    HookEventContent,
+    shield,
+    hook_event_logger,
+)
 
 
 def handle_prompt_submitted(
@@ -61,8 +67,13 @@ def handle_prompt_submitted(
             )
         )
 
-        # Save event asynchronously
-        shield(event.save)
+        try:
+            anyio.run(shield, event.save)
+        except Exception as e:
+            hook_event_logger.error(
+                f"Failed to save event: {e}",
+                exc_info=True,
+            )
 
         return {
             "prompt_length": prompt_length,
