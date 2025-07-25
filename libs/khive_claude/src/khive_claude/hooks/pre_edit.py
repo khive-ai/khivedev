@@ -12,8 +12,13 @@ Called before Claude Code edits files to log and monitor file modification event
 import json
 import sys
 from typing import Any
-
-from khive_claude.hooks.hook_event import HookEvent, HookEventContent, shield
+import anyio
+from khive_claude.hooks.hook_event import (
+    HookEvent,
+    HookEventContent,
+    shield,
+    hook_event_logger,
+)
 
 
 def handle_pre_edit(
@@ -31,13 +36,13 @@ def handle_pre_edit(
             )
         )
 
-        # Save event asynchronously
-        import asyncio
         try:
-            asyncio.run(event.save())
+            anyio.run(shield, event.save)
         except Exception as e:
-            # Don't let database errors block the hook
-            pass
+            hook_event_logger.error(
+                f"Failed to save event: {e}",
+                exc_info=True,
+            )
 
         return {"proceed": True, "file_count": len(file_paths), "event_logged": True}
 

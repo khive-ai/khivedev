@@ -210,8 +210,11 @@ def status(limit: int, event_type: Optional[str], session_id: Optional[str]):
 
                 for event in reversed(events[-20:]):  # Show last 20, newest first
                     from datetime import datetime
+
                     if isinstance(event.created_at, (int, float)):
-                        event_time = datetime.fromtimestamp(event.created_at).strftime("%H:%M:%S")
+                        event_time = datetime.fromtimestamp(event.created_at).strftime(
+                            "%H:%M:%S"
+                        )
                     else:
                         event_time = event.created_at.strftime("%H:%M:%S")
                     event_type_display = event.content.get("event_type", "unknown")[:14]

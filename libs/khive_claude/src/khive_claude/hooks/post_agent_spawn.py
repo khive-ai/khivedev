@@ -13,7 +13,13 @@ import json
 import sys
 from typing import Any
 
-from khive_claude.hooks.hook_event import HookEvent, HookEventContent, shield
+import anyio
+from khive_claude.hooks.hook_event import (
+    HookEvent,
+    HookEventContent,
+    shield,
+    hook_event_logger,
+)
 
 
 def handle_post_agent_spawn(
@@ -57,13 +63,13 @@ def handle_post_agent_spawn(
             )
         )
 
-        # Save event asynchronously
-        import asyncio
         try:
-            asyncio.run(shield(event.save))
+            anyio.run(shield, event.save)
         except Exception as e:
-            # Don't let database errors block the hook
-            pass
+            hook_event_logger.error(
+                f"Failed to save event: {e}",
+                exc_info=True,
+            )
 
         return {
             "output_length": output_length,
