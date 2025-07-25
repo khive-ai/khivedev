@@ -1,6 +1,6 @@
 # khivedev
 
-- [Khive Claude](libs/khive_claude/README.md)
+- [Khive Claude](libs/khive_claude/README.md) (MIT)
 
 ```
 # step 1: Clone the repository
