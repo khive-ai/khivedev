@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Optional
 
 import click
-
 from khive_claude.frontend.realtime_server import HookEventWebSocketServer
 from khive_claude.hooks.hook_event import HookEvent, HookEventBroadcaster
 

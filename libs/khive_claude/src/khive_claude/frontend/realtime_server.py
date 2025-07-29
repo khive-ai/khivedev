@@ -18,7 +18,6 @@ from datetime import datetime
 from typing import Any, Dict, Set
 
 import websockets
-
 from khive_claude.hooks.hook_event import HookEvent, HookEventBroadcaster
 
 logger = logging.getLogger(__name__)

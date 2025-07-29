@@ -12,12 +12,13 @@ Called before Claude Code edits files to log and monitor file modification event
 import json
 import sys
 from typing import Any
+
 import anyio
 from khive_claude.hooks.hook_event import (
     HookEvent,
     HookEventContent,
-    shield,
     hook_event_logger,
+    shield,
 )
 
 

@@ -6,7 +6,7 @@
 Claude Code Observability - Real-time hook monitoring and dashboard.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 from .frontend.realtime_server import HookEventWebSocketServer
 from .frontend.streamlit_dashboard import ClaudeCodeObservabilityDashboard

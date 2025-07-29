@@ -17,8 +17,8 @@ import anyio
 from khive_claude.hooks.hook_event import (
     HookEvent,
     HookEventContent,
-    shield,
     hook_event_logger,
+    shield,
 )
 
 

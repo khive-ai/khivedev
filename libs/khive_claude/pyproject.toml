@@ -1,11 +1,11 @@
 [project]
 name = "khive_claude"
-version = "0.1.1"
+version = "0.1.2"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "lionagi[postgres]>=0.14.4",
+    "lionagi[postgres, sqlite]>=0.14.8",
     "plotly>=6.2.0",
     "streamlit>=1.47.0",
     "websockets>=15.0.1",
