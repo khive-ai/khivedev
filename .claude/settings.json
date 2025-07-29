@@ -101,5 +101,6 @@
       "Bash(eval *)"
     ]
   },
-  "includeCoAuthoredBy": true
+  "includeCoAuthoredBy": true,
+  "enableAllProjectMcpServers": true
 }

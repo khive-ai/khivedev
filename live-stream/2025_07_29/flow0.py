@@ -1,31 +1,36 @@
-#!/usr/bin/env python3
-"""
-Memory MCP Migration - Flow 0: Pain Point Validation
-Direct LionAGI implementation using fan_out_in pattern
-"""
-
-import asyncio
-
-from lionagi import Branch, Builder, Session
-from lionagi.fields import Instruct
-from utils import (
-    OrchestrationPlanField,
-    create_cc,
-    create_cc_branch,
-    get_branch_summary_from_operation,
-)
-
+agent_config = ".khive/agents/analyst"
 REPO = "/Users/lion/projects/khivedev"
 CC_WORKSPACE = ".khive/workspaces"
 FLOW_NAME = "memory_mcp_flow0"
+
+
+from pathlib import Path
+from typing import Literal
+
+from lionagi import iModel
+from lionagi.utils import create_path
+
+AgentRole = Literal[
+    "orchestrator",
+    "analyst",
+    "architect",
+    "auditor",
+    "commentator",
+    "critic",
+    "implementer",
+    "innovator",
+    "researcher",
+    "reviewer",
+    "strategist",
+    "tester",
+    "theorist",
+]
 
 CONTEXT = """
 - memory mcp: archives/references/memory
 - lion-cognition: crates/lion-cognition
 """
 
-
-# Flow 0 Orchestrator Prompt
 planning_prompt = """
 🎯 **Memory MCP Migration - Flow 0: Pain Point Validation**
 
@@ -64,7 +69,7 @@ Each instruction should:
 Glance through the key files, and then Generate the 4 specialized validation instructions.
 """
 
-synthesis_prompt = f"""
+synthesis_prompt = """
 **Flow 0 Synthesis: Pain Point Validation Results**
 
 Synthesize findings from 4 parallel validators into:
@@ -92,8 +97,58 @@ Synthesize findings from 4 parallel validators into:
    - [ ] User journeys cover 80% usage
 
 Output: Structured summary with next steps for Flow 1. 
-written down as md file under {REPO}/live-stream/2025_07_29
+written down as md file under /Users/lion/projects/lionkhive/flows/knowledge_graph_migration/
 """
+
+
+def create_cc(
+    flow_name: str,
+    role: AgentRole,
+    agent_suffix: str = "",
+    model: str = "sonnet",
+    verbose_output: bool = True,
+    auto_finish: bool = False,
+):
+    """Create Claude Code model instance for LionAGI operations."""
+
+    params = {"permission_mode": "acceptEdits"}
+    if role == "orchestrator":
+        params["permission_mode"] = "bypassPermissions"
+
+    elif role not in ["tester", "reviewer", "architect", "implementer"]:
+        params["ws"] = f"{CC_WORKSPACE}/{flow_name}/{role}{agent_suffix}"
+        params["add_dir"] = "../../../../"
+        text = Path(
+            f"{REPO}/{CC_WORKSPACE}/agents/{role}/.claude/settings.json"
+        ).read_text()
+        fp = create_path(
+            directory=f"{REPO}/{CC_WORKSPACE}/{flow_name}/{role}{agent_suffix}/.claude",
+            filename="settings.json",
+            file_exist_ok=True,
+        )
+        fp.write_text(text)
+
+        # text = Path(
+        #     f"{REPO}/{CC_WORKSPACE}/agents/{role}/.claude/.mcp.json"
+        # ).read_text()
+        # fp = create_path(
+        #     directory=f"{REPO}/{CC_WORKSPACE}/{flow_name}/{role}{agent_suffix}",
+        #     filename=".mcp.json",
+        #     file_exist_ok=True,
+        # )
+        # fp.write_text(text)
+
+    return iModel(
+        provider="claude_code",
+        endpoint="query_cli",
+        model=model,
+        api_key="dummy_api_key",
+        verbose_output=verbose_output,
+        cli_display_theme="dark",
+        auto_finish=auto_finish,
+        repo=REPO,
+        **params,
+    )
 
 
 async def main():
@@ -102,8 +157,12 @@ async def main():
             role="orchestrator",
             flow_name=FLOW_NAME,
             auto_finish=True,
-            model="opus",
+            model="sonnet",
         )
+
+        from lionagi import Branch, Builder, Session
+        from lionagi.fields import Instruct
+
         orchestrator = Branch(
             name=f"{FLOW_NAME}_orchestrator",
             chat_model=orc_cc,
@@ -115,6 +174,8 @@ async def main():
         session = Session(default_branch=orchestrator)
         builder = Builder(FLOW_NAME)
 
+        from lionagi.fields import LIST_INSTRUCT_FIELD_MODEL
+
         # phase 1: Initial context digestion and Orchestration Planning
         root = builder.add_operation(
             "operate",
@@ -124,13 +185,14 @@ async def main():
                 guidance=(
                     "You are allowed with only one round of orchestration planning for current flow, "
                     "attempt to return a list in `orchestration_plans` will result in an error, and "
-                    "require re-parsing the output. You must consult with `uv run khive plan [context]` "
+                    "require re-parsing the output. "
                     "to get the task agent compositions suggestions and analysis, which you need to provide"
                     "more than sufficient context for planner to understand the task."
+                    "quickly please"
                 ),
             ),
             reason=True,
-            field_models=[OrchestrationPlanField],
+            field_models=[LIST_INSTRUCT_FIELD_MODEL],
         )
 
         builder.visualize("🧪 Flow 0: Pain Point Validation - Phase 1: Planning")
@@ -138,61 +200,27 @@ async def main():
         # Execute the initial operation to get orchestration plans
         result = await session.flow(builder.get_graph())
 
-        plan = result["operation_results"][root].orchestration_plans
-        for a in plan.agent_requests:
-            print(
-                f"Agent: {a.compose_request.role}, Domains: {a.compose_request.domains}, Context: {a.compose_request.context}"
-            )
-            print(f"- Instruction: {a.instruct.instruction}")
+        instruct_models = result["operation_results"][root].instruct_models
 
-        # phase 2: Add operations for each agent request
+        roles = ["tester", "critic", "analyst", "researcher"]
         research_nodes = []
-        for idx, item in enumerate(plan.agent_requests):
-            if idx > 5:
-                print(f"⚠️ Skipping instruction {idx} as it exceeds the limit")
-                break
-
-            instruct = item.instruct
-            compose_request = item.compose_request
+        for idx, instruct in enumerate(instruct_models):
             node = builder.add_operation(
                 "communicate",
                 depends_on=[root],
-                branch=await create_cc_branch(
-                    compose_request=compose_request,
-                    flow_name=FLOW_NAME,
-                    session=session,
-                ),
-                instruction="Perform task, make sure you report all your work in the result message",
-                context={
-                    "task_instruction": instruct.instruction,
-                    "common_background": plan.common_background,
-                    "agent_specific_context": instruct.context,
-                },
-                guidance=(
-                    f"{instruct.guidance}"
-                    f"{' with deepthink and multi perspective reflection' if instruct.reason else ''}"
-                    f"{' with batch tool for parallel execution' if instruct.action_strategy == 'concurrent' else ''}"
-                ).strip(),
+                instruction=instruct.model_dump_json(),
+                chat_model=create_cc(flow_name=FLOW_NAME, role=roles[idx]),
             )
             research_nodes.append(node)
 
-        # Execute the parallel validation tasks
-        builder.visualize("🧪 Flow 0: Pain Point Validation - Phase 2")
-        await session.flow(builder.get_graph())
-
-        additional_context = []
-        for node in research_nodes:
-            summary = get_branch_summary_from_operation(
-                session, node, builder.get_graph()
-            )
-            additional_context.append(summary)
+        builder.visualize("🧪 Flow 0: Pain Point Validation - Phase 2: Research Nodes")
+        result = await session.flow(builder.get_graph())
 
         # Phase 3: Synthesis
         synthesis = builder.add_aggregation(
             "communicate",
             source_node_ids=research_nodes,
             branch=orchestrator,
-            context=additional_context,
             instruction=synthesis_prompt,
         )
 
@@ -217,4 +245,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import anyio
+
+    anyio.run(main)
