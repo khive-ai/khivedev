@@ -1,5 +1,9 @@
 # khivedev
 
+[Join our Discord](https://discord.gg/JDj9ENhUE8)
+
+### Projects
+
 - [Khive Claude](libs/khive_claude/README.md) (MIT)
 
 ```
@@ -18,6 +22,3 @@ uv run python -m khive_claude.cli start
 
 
 ![alt text](libs/khive_claude/docs/assets/dashboard-preview.png)
-
-
-
