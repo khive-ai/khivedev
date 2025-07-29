@@ -5,15 +5,23 @@ Direct LionAGI implementation using fan_out_in pattern
 """
 
 import asyncio
+
 from lionagi import Branch, Builder, Session
 from lionagi.fields import Instruct
+from utils import (
+    OrchestrationPlanField,
+    create_cc,
+    create_cc_branch,
+    get_branch_summary_from_operation,
+)
 
-from utils import OrchestrationPlanField, create_cc, create_cc_branch, get_branch_summary_from_operation
-
+REPO = "/Users/lion/projects/khivedev"
+CC_WORKSPACE = ".khive/workspaces"
 FLOW_NAME = "memory_mcp_flow0"
+
 CONTEXT = """
-- memory mcp: /Users/lion/projects/lionkhive/archives/references/memory
-- lion-cognition: /Users/lion/projects/lionkhive/archives/references/lion-cognition
+- memory mcp: archives/references/memory
+- lion-cognition: crates/lion-cognition
 """
 
 
@@ -56,7 +64,7 @@ Each instruction should:
 Glance through the key files, and then Generate the 4 specialized validation instructions.
 """
 
-synthesis_prompt = """
+synthesis_prompt = f"""
 **Flow 0 Synthesis: Pain Point Validation Results**
 
 Synthesize findings from 4 parallel validators into:
@@ -84,8 +92,9 @@ Synthesize findings from 4 parallel validators into:
    - [ ] User journeys cover 80% usage
 
 Output: Structured summary with next steps for Flow 1. 
-written down as md file under /Users/lion/projects/lionkhive/flows/knowledge_graph_migration/
+written down as md file under {REPO}/live-stream/2025_07_29
 """
+
 
 async def main():
     try:
@@ -105,7 +114,7 @@ async def main():
 
         session = Session(default_branch=orchestrator)
         builder = Builder(FLOW_NAME)
-        
+
         # phase 1: Initial context digestion and Orchestration Planning
         root = builder.add_operation(
             "operate",
@@ -131,7 +140,9 @@ async def main():
 
         plan = result["operation_results"][root].orchestration_plans
         for a in plan.agent_requests:
-            print(f"Agent: {a.compose_request.role}, Domains: {a.compose_request.domains}, Context: {a.compose_request.context}")
+            print(
+                f"Agent: {a.compose_request.role}, Domains: {a.compose_request.domains}, Context: {a.compose_request.context}"
+            )
             print(f"- Instruction: {a.instruct.instruction}")
 
         # phase 2: Add operations for each agent request
@@ -140,12 +151,12 @@ async def main():
             if idx > 5:
                 print(f"⚠️ Skipping instruction {idx} as it exceeds the limit")
                 break
-            
+
             instruct = item.instruct
             compose_request = item.compose_request
             node = builder.add_operation(
                 "communicate",
-                depends_on=[root], 
+                depends_on=[root],
                 branch=await create_cc_branch(
                     compose_request=compose_request,
                     flow_name=FLOW_NAME,
@@ -171,7 +182,9 @@ async def main():
 
         additional_context = []
         for node in research_nodes:
-            summary = get_branch_summary_from_operation(session, node, builder.get_graph())
+            summary = get_branch_summary_from_operation(
+                session, node, builder.get_graph()
+            )
             additional_context.append(summary)
 
         # Phase 3: Synthesis

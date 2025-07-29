@@ -1,24 +1,18 @@
+import os
 from pathlib import Path
-from typing import Literal, List, Any
-from lionagi import BaseModel, Session, iModel, Branch
-from lionagi.models import FieldModel
-from lionagi.fields import Instruct
-from lionagi.utils import create_path
-
-# Import existing khive composer models
-from khive.services.composer.parts import ComposerRequest, ComposerResponse
-from khive.services.composer.composer_service import ComposerService
+from typing import Any, List, Literal
 
 from dotenv import load_dotenv
-import os
+from lionagi import BaseModel, Branch, Session, iModel
+from lionagi.fields import Instruct
+from lionagi.models import FieldModel
+from lionagi.utils import create_path
 
 load_dotenv()
 
 # Configuration
 REPO = os.getenv("LOCAL_REPO")
 CC_WORKSPACE = os.getenv("CC_WORKSPACE", ".khive/workspaces")
-
-composor = ComposerService()
 
 
 AgentRole = Literal[
@@ -167,14 +161,14 @@ OrchestrationPlanField = FieldModel(
 
 def extract_tool_use_summary(claude_session_response) -> dict[str, Any]:
     """Extract tool usage summary from Claude Code session response.
-    
+
     Args:
         claude_session_response: ClaudeSession-like object with tool_uses, tool_results, etc.
-        
+
     Returns:
         Dictionary with tool usage summary including:
         - tool_counts: Count of each tool used
-        - tool_details: Detailed information about tool usage  
+        - tool_details: Detailed information about tool usage
         - file_operations: Summary of file read/write operations
         - key_actions: High-level summary of what was accomplished
         - result_summary: Final result text
@@ -187,90 +181,90 @@ def extract_tool_use_summary(claude_session_response) -> dict[str, Any]:
             "file_operations": {"reads": [], "writes": [], "edits": []},
             "key_actions": ["No tool usage detected"],
             "result_summary": "",
-            "usage_stats": {}
+            "usage_stats": {},
         }
-    
+
     # Access the materialized views directly
-    tool_uses = getattr(claude_session_response, 'tool_uses', [])
-    result = getattr(claude_session_response, 'result', "")
-    usage = getattr(claude_session_response, 'usage', {})
-    
+    tool_uses = getattr(claude_session_response, "tool_uses", [])
+    result = getattr(claude_session_response, "result", "")
+    usage = getattr(claude_session_response, "usage", {})
+
     tool_counts = {}
     tool_details = []
     file_operations = {"reads": [], "writes": [], "edits": []}
     key_actions = []
-    
+
     # Process tool uses from the clean materialized view
     for tool_use in tool_uses:
         tool_name = tool_use.get("name", "unknown")
         tool_input = tool_use.get("input", {})
         tool_id = tool_use.get("id", "")
-        
+
         # Count tool usage
         tool_counts[tool_name] = tool_counts.get(tool_name, 0) + 1
-        
+
         # Store detailed info
-        tool_details.append({
-            "tool": tool_name,
-            "id": tool_id,
-            "input": tool_input
-        })
-        
+        tool_details.append({"tool": tool_name, "id": tool_id, "input": tool_input})
+
         # Categorize file operations and actions
         if tool_name in ["Read", "read"]:
             file_path = tool_input.get("file_path", "unknown")
             file_operations["reads"].append(file_path)
             key_actions.append(f"Read {file_path}")
-            
+
         elif tool_name in ["Write", "write"]:
-            file_path = tool_input.get("file_path", "unknown") 
+            file_path = tool_input.get("file_path", "unknown")
             file_operations["writes"].append(file_path)
             key_actions.append(f"Wrote {file_path}")
-            
+
         elif tool_name in ["Edit", "edit", "MultiEdit"]:
             file_path = tool_input.get("file_path", "unknown")
             file_operations["edits"].append(file_path)
             key_actions.append(f"Edited {file_path}")
-            
+
         elif tool_name in ["Bash", "bash"]:
             command = tool_input.get("command", "")
             command_summary = command[:50] + "..." if len(command) > 50 else command
             key_actions.append(f"Ran: {command_summary}")
-            
+
         elif tool_name in ["Glob", "glob"]:
             pattern = tool_input.get("pattern", "")
             key_actions.append(f"Searched files: {pattern}")
-            
+
         elif tool_name in ["Grep", "grep"]:
             pattern = tool_input.get("pattern", "")
             key_actions.append(f"Searched content: {pattern}")
-            
+
         elif tool_name in ["Task", "task"]:
             description = tool_input.get("description", "")
             key_actions.append(f"Spawned task: {description}")
-            
+
         elif tool_name.startswith("mcp__"):
             # MCP tool usage - extract the operation type
             operation = tool_name.replace("mcp__memory__", "").replace("mcp__", "")
             key_actions.append(f"MCP {operation}")
-            
+
         elif tool_name == "TodoWrite":
             todos = tool_input.get("todos", [])
             key_actions.append(f"Created {len(todos)} todos")
-        
+
         else:
             key_actions.append(f"Used {tool_name}")
-    
+
     # Deduplicate key actions
-    key_actions = list(dict.fromkeys(key_actions)) if key_actions else ["No specific actions detected"]
-    
+    key_actions = (
+        list(dict.fromkeys(key_actions))
+        if key_actions
+        else ["No specific actions detected"]
+    )
+
     # Deduplicate file paths
     for op_type in file_operations:
         file_operations[op_type] = list(dict.fromkeys(file_operations[op_type]))
-    
+
     # Extract result summary (first 200 chars)
     result_summary = (result[:200] + "...") if len(result) > 200 else result
-    
+
     return {
         "tool_counts": tool_counts,
         "tool_details": tool_details,
@@ -279,30 +273,31 @@ def extract_tool_use_summary(claude_session_response) -> dict[str, Any]:
         "total_tool_calls": sum(tool_counts.values()),
         "result_summary": result_summary,
         "usage_stats": {
-            "total_cost_usd": getattr(claude_session_response, 'total_cost_usd', None),
-            "num_turns": getattr(claude_session_response, 'num_turns', None),
-            "duration_ms": getattr(claude_session_response, 'duration_ms', None),
-            **usage
-        }
+            "total_cost_usd": getattr(claude_session_response, "total_cost_usd", None),
+            "num_turns": getattr(claude_session_response, "num_turns", None),
+            "duration_ms": getattr(claude_session_response, "duration_ms", None),
+            **usage,
+        },
     }
+
 
 def get_branch_summary_from_operation(session, operation_id, graph) -> dict[str, Any]:
     """Helper to get tool summary directly from an operation's branch.
-    
+
     Args:
         session: LionAGI session
         operation: Operation object with branch_id
-        
+
     Returns:
         Tool usage summary dict
     """
     try:
         operation = graph.internal_nodes[operation_id]
         branch = session.get_branch(operation.branch_id, None)
-        if branch and hasattr(branch, 'messages') and branch.messages:
+        if branch and hasattr(branch, "messages") and branch.messages:
             # Get the last assistant message which should have the ClaudeSession response
             last_message = branch.messages[-1]
-            if hasattr(last_message, 'model_response'):
+            if hasattr(last_message, "model_response"):
                 return {
                     "branch_id": str(branch.id),
                     "branch_name": branch.name,
@@ -314,5 +309,3 @@ def get_branch_summary_from_operation(session, operation_id, graph) -> dict[str,
             return {"error": "No branch or messages found"}
     except Exception as e:
         return {"error": f"Failed to extract summary: {str(e)}"}
-
-
