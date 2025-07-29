@@ -2,7 +2,7 @@
 
 Real-time monitoring and observability for Claude Code hook events. This project demonstrates how to use Claude Code's hook system to capture, store, and visualize all tool interactions in real-time.
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🎯 Purpose
