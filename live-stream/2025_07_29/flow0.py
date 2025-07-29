@@ -185,10 +185,7 @@ async def main():
                 guidance=(
                     "You are allowed with only one round of orchestration planning for current flow, "
                     "attempt to return a list in `orchestration_plans` will result in an error, and "
-                    "require re-parsing the output. "
-                    "to get the task agent compositions suggestions and analysis, which you need to provide"
-                    "more than sufficient context for planner to understand the task."
-                    "quickly please"
+                    "require re-parsing the output."
                 ),
             ),
             reason=True,
