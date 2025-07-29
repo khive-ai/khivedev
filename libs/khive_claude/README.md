@@ -20,16 +20,19 @@ Claude Code provides a powerful hook system that allows you to intercept and mon
 ### 1. Install khive_claude
 
 ```bash
-# Clone the repository
+# step 1: Clone the repository
 git clone https://github.com/khive-ai/khivedev.git
-cd khive_claude
 
-# Install with uv (recommended)
-uv pip install -e .
+# step 2: install
+uv sync
 
-# Or with pip
-pip install -e .
+# step 3: run the dashboard and websocket server
+uv run python -m khive_claude.cli start
 ```
+
+- open browser to [http://localhost:8501](http://localhost:8501)
+- copy the [hooks settings](.claude/settings.json) to your `.claude/settings.json`
+
 
 ### 2. Configure Claude Code Hooks
 
