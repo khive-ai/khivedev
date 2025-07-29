@@ -2,3 +2,11 @@
 members = [
     "libs/khive_claude",
 ]
+
+[dependency-groups]
+dev = [
+    "black[jupyter]>=25.1.0",
+    "fastapi>=0.116.1",
+    "loguru>=0.7.3",
+    "uvicorn>=0.35.0",
+]
