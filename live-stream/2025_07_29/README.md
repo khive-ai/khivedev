@@ -1,5 +1,7 @@
 # Live Stream 2025-07-29: AI Orchestrating AI
 
+- [Watch the Recording](https://app.fireflies.ai/view/Tuesday-Live-w-Ocean-2025-07-29::01K1BEAVK5276W8EWYHHH8BR0Q)
+
 **🎬 10-Minute Autonomous Multi-Agent Investigation**
 
 Watch as LionAGI coordinates five Claude Code agents—one orchestrator and four specialists—to validate a critical system migration decision. Complete autonomous investigation in parallel, with zero human intervention after setup.
