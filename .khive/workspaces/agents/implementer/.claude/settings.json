@@ -1,0 +1,12 @@
+{
+  "provider": "claude_code",
+  "model": "sonnet",
+  "temperature": 0.1,
+  "max_tokens": 4000,
+  "timeout": 300,
+  "workspace": {
+    "name": "implementer_agent",
+    "description": "Implementer Agent - Build and deploy working systems from specifications",
+    "specialization": "Production-ready code from architectural specifications"
+  }
+}

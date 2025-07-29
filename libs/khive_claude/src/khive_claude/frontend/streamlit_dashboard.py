@@ -25,7 +25,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import websockets
-
 from khive_claude.hooks.hook_event import HookEvent, HookEventBroadcaster
 
 # Page config with enhanced styling
@@ -407,7 +406,7 @@ class ClaudeCodeObservabilityDashboard:
             f"""
         <div style="text-align: center; padding: 0.5rem; background: #f0f2f6; border-radius: 8px; margin: 1rem 0; font-size: 0.875rem; color: #6c757d;">
             <strong>{len(self.events_cache)}</strong> events loaded | 
-            Last update: <strong>{datetime.fromtimestamp(self.last_load_time).strftime('%H:%M:%S') if self.last_load_time else 'Never'}</strong> | 
+            Last update: <strong>{datetime.fromtimestamp(self.last_load_time).strftime("%H:%M:%S") if self.last_load_time else "Never"}</strong> | 
             {refresh_text}
         </div>
         """,
@@ -453,8 +452,8 @@ class ClaudeCodeObservabilityDashboard:
                 f"""
             <div class="metric-card">
                 <div class="metric-label">📈 Total Events</div>
-                <div class="metric-value" style="color: #1e3c72;">{metrics['total_events']:,}</div>
-                <div class="metric-delta">+{metrics['recent_events_5m']} in 5min</div>
+                <div class="metric-value" style="color: #1e3c72;">{metrics["total_events"]:,}</div>
+                <div class="metric-delta">+{metrics["recent_events_5m"]} in 5min</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -468,7 +467,7 @@ class ClaudeCodeObservabilityDashboard:
                 f"""
             <div class="metric-card">
                 <div class="metric-label">⏱️ Last Hour</div>
-                <div class="metric-value" style="color: #2a5298;">{metrics['recent_events_1h']:,}</div>
+                <div class="metric-value" style="color: #2a5298;">{metrics["recent_events_1h"]:,}</div>
                 <div class="metric-delta">~{hourly_rate}/hour rate</div>
             </div>
             """,
@@ -509,8 +508,8 @@ class ClaudeCodeObservabilityDashboard:
                 f"""
             <div class="metric-card">
                 <div class="metric-label">🎯 Most Active</div>
-                <div class="metric-value" style="color: #6f42c1; font-size: 1.2rem; text-transform: capitalize;">{most_active_hook.replace('_', ' ')}</div>
-                <div class="metric-delta">{metrics['hook_types'].get(most_active_hook, 0)} events</div>
+                <div class="metric-value" style="color: #6f42c1; font-size: 1.2rem; text-transform: capitalize;">{most_active_hook.replace("_", " ")}</div>
+                <div class="metric-delta">{metrics["hook_types"].get(most_active_hook, 0)} events</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -527,7 +526,7 @@ class ClaudeCodeObservabilityDashboard:
             <div class="metric-card">
                 <div class="metric-label">🤖 Active Agents</div>
                 <div class="metric-value" style="color: {agent_color};">{metrics["estimated_active_agents"]}</div>
-                <div class="metric-delta">{'Busy' if metrics["estimated_active_agents"] > 3 else 'Normal'} load</div>
+                <div class="metric-delta">{"Busy" if metrics["estimated_active_agents"] > 3 else "Normal"} load</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -541,7 +540,7 @@ class ClaudeCodeObservabilityDashboard:
                         border-left: 4px solid {activity_color}; border-radius: 6px;">
                 <strong>System Activity:</strong> {activity_level} 
                 <span style="color: {activity_color};">●</span> 
-                {metrics['recent_events_5m']} events in last 5 minutes ({events_per_minute} events/min)
+                {metrics["recent_events_5m"]} events in last 5 minutes ({events_per_minute} events/min)
             </div>
             """,
                 unsafe_allow_html=True,
@@ -797,7 +796,7 @@ class ClaudeCodeObservabilityDashboard:
                         ),
                         stackgroup="one",
                         fillcolor=color_map.get(event_type, "#6c757d"),
-                        hovertemplate=f'<b>{event_type.replace("_", " ").title()}</b><br>{x_title}: %{{x}}<br>Events: %{{y}}<extra></extra>',
+                        hovertemplate=f"<b>{event_type.replace('_', ' ').title()}</b><br>{x_title}: %{{x}}<br>Events: %{{y}}<extra></extra>",
                     )
                 )
 
@@ -963,7 +962,7 @@ class ClaudeCodeObservabilityDashboard:
                         ]  # Show max 2 files
                         file_display = ", ".join(file_names)
                         if len(file_paths) > 2:
-                            file_display += f" +{len(file_paths)-2} more"
+                            file_display += f" +{len(file_paths) - 2} more"
                         details = f"📁 {file_display}"
                     else:
                         details = "📁 File edit"
@@ -1110,7 +1109,7 @@ class ClaudeCodeObservabilityDashboard:
             if file_paths:
                 detail_summary = f"Editing {len(file_paths)} file(s): {', '.join([fp.split('/')[-1] for fp in file_paths[:3]])}"
                 if len(file_paths) > 3:
-                    detail_summary += f" +{len(file_paths)-3} more"
+                    detail_summary += f" +{len(file_paths) - 3} more"
             else:
                 detail_summary = "File editing operation"
         elif command:
@@ -1123,8 +1122,8 @@ class ClaudeCodeObservabilityDashboard:
         <div style="border-left: 4px solid {border_color}; padding: 1rem; margin: 0.5rem 0; 
                     background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h4 style="margin: 0; color: {border_color};">{icon} {event_type.replace('_', ' ').title()}</h4>
-                <small style="color: #6c757d;">{event['datetime'].strftime('%H:%M:%S')}</small>
+                <h4 style="margin: 0; color: {border_color};">{icon} {event_type.replace("_", " ").title()}</h4>
+                <small style="color: #6c757d;">{event["datetime"].strftime("%H:%M:%S")}</small>
             </div>
             
             <div style="margin: 0.5rem 0; padding: 0.5rem; background: #f8f9fa; border-radius: 5px;">
@@ -1132,15 +1131,15 @@ class ClaudeCodeObservabilityDashboard:
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.5rem 0;">
-                <div><strong>🛠️ Tool:</strong> {event.get('tool_name', 'Unknown')}</div>
-                <div><strong>👤 Session:</strong> {session_id[:12] + '...' if len(session_id) > 12 else session_id}</div>
+                <div><strong>🛠️ Tool:</strong> {event.get("tool_name", "Unknown")}</div>
+                <div><strong>👤 Session:</strong> {session_id[:12] + "..." if len(session_id) > 12 else session_id}</div>
             </div>
             
-            {f'<div style="margin: 0.5rem 0;"><strong>💻 Full Command:</strong><br><code style="background: #f8f9fa; padding: 0.5rem; border-radius: 3px; display: block; word-break: break-all;">{command}</code></div>' if command else ''}
+            {f'<div style="margin: 0.5rem 0;"><strong>💻 Full Command:</strong><br><code style="background: #f8f9fa; padding: 0.5rem; border-radius: 3px; display: block; word-break: break-all;">{command}</code></div>' if command else ""}
             
-            {f'<div style="margin: 0.5rem 0;"><strong>📁 File Paths:</strong><br>' + '<br>'.join([f'<code style="background: #e9ecef; padding: 0.2rem; border-radius: 2px;">{fp}</code>' for fp in file_paths[:5]]) + (f'<br><em>...and {len(file_paths)-5} more files</em>' if len(file_paths) > 5 else '') + '</div>' if file_paths else ''}
+            {f'<div style="margin: 0.5rem 0;"><strong>📁 File Paths:</strong><br>' + "<br>".join([f'<code style="background: #e9ecef; padding: 0.2rem; border-radius: 2px;">{fp}</code>' for fp in file_paths[:5]]) + (f"<br><em>...and {len(file_paths) - 5} more files</em>" if len(file_paths) > 5 else "") + "</div>" if file_paths else ""}
             
-            {f'<div style="margin: 0.5rem 0;"><strong>📊 Metadata:</strong><br><small style="font-family: monospace; background: #f8f9fa; padding: 0.5rem; border-radius: 3px; display: block;">{str(metadata)[:300]}{"..." if len(str(metadata)) > 300 else ""}</small></div>' if metadata else ''}
+            {f'<div style="margin: 0.5rem 0;"><strong>📊 Metadata:</strong><br><small style="font-family: monospace; background: #f8f9fa; padding: 0.5rem; border-radius: 3px; display: block;">{str(metadata)[:300]}{"..." if len(str(metadata)) > 300 else ""}</small></div>' if metadata else ""}
         </div>
         """,
             unsafe_allow_html=True,
@@ -1222,12 +1221,13 @@ class ClaudeCodeObservabilityDashboard:
             if st.sidebar.button("🔄 Test Connection"):
                 try:
                     import asyncio
-                    import websockets
                     import json
+
+                    import websockets
 
                     async def test_ws():
                         async with websockets.connect(
-                            f'ws://localhost:{CONFIG["WEBSOCKET_PORT"]}'
+                            f"ws://localhost:{CONFIG['WEBSOCKET_PORT']}"
                         ) as ws:
                             await ws.send(json.dumps({"type": "ping"}))
                             response = await ws.recv()

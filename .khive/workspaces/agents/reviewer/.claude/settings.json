@@ -1,0 +1,12 @@
+{
+  "provider": "claude_code",
+  "model": "sonnet",
+  "temperature": 0.1,
+  "max_tokens": 4000,
+  "timeout": 300,
+  "workspace": {
+    "name": "reviewer_agent",
+    "description": "Reviewer Agent - Constructive improvement recommendations with implementation guidance",
+    "specialization": "Quality improvement through constructive feedback and optimization"
+  }
+}
